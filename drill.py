@@ -8,11 +8,11 @@ import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier 
 from sklearn.metrics import precision_score, recall_score, f1_score
 
 
-def train_decision_tree(X_train, y_train, max_depth=5, random_state=42):
+def train_decision_tree(X_train, y_train, max_depth=5, random_state=42): 
     """Train a DecisionTreeClassifier.
 
     Args:
@@ -24,8 +24,10 @@ def train_decision_tree(X_train, y_train, max_depth=5, random_state=42):
     Returns:
         Fitted DecisionTreeClassifier.
     """
-    # TODO: Create and fit a DecisionTreeClassifier
-    pass
+    # Create and fit a DecisionTreeClassifier
+    tree = DecisionTreeClassifier(max_depth=max_depth, random_state=random_state) 
+    tree.fit(X_train, y_train) 
+    return tree
 
 
 def get_feature_importances(model, feature_names):
@@ -38,12 +40,14 @@ def get_feature_importances(model, feature_names):
     Returns:
         Dictionary mapping feature name to importance value, sorted descending.
     """
-    # TODO: Extract importances and return as a sorted dictionary
-    pass
+    #  Extract importances and return as a sorted dictionary
+    importances = model.feature_importances_ 
+    feature_importance_dict = dict(zip(feature_names, importances))
+    return dict(sorted(feature_importance_dict.items(), key=lambda x: x[1], reverse=True)) 
 
 
 def train_balanced_forest(X_train, y_train, X_test, y_test,
-                          n_estimators=100, random_state=42):
+                          n_estimators=100, random_state=42): 
     """Train a RandomForest with balanced class weights and return metrics.
 
     Args:
@@ -55,9 +59,15 @@ def train_balanced_forest(X_train, y_train, X_test, y_test,
     Returns:
         Dictionary with keys: 'precision', 'recall', 'f1'.
     """
-    # TODO: Train RandomForestClassifier with class_weight='balanced',
-    #       predict on test set, compute and return metrics
-    pass
+    #  Train RandomForestClassifier with class_weight='balanced',predict on test set, compute and return metrics
+    rf = RandomForestClassifier(n_estimators=n_estimators, class_weight='balanced', random_state=random_state)
+    rf.fit(X_train, y_train)
+    y_pred = rf.predict(X_test) 
+    return {
+        'precision': precision_score(y_test, y_pred),
+        'recall': recall_score(y_test, y_pred),
+        'f1': f1_score(y_test, y_pred)
+    } 
 
 
 if __name__ == "__main__":
@@ -69,7 +79,7 @@ if __name__ == "__main__":
     y = df["churned"]
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, stratify=y, random_state=42
-    )
+    ) 
 
     # Task 1
     tree = train_decision_tree(X_train, y_train)
@@ -80,9 +90,9 @@ if __name__ == "__main__":
     if tree:
         importances = get_feature_importances(tree, features)
         if importances:
-            print(f"Top features: {list(importances.items())[:3]}")
+            print(f"Top features: {list(importances.items())[:3]}") 
 
     # Task 3
     metrics = train_balanced_forest(X_train, y_train, X_test, y_test)
     if metrics:
-        print(f"Balanced RF: {metrics}")
+        print(f"Balanced RF: {metrics}") 
