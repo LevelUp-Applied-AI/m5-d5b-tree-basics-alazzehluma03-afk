@@ -46,24 +46,27 @@ def get_feature_importances(model, feature_names):
     return dict(sorted(feature_importance_dict.items(), key=lambda x: x[1], reverse=True)) 
 
 # this function I  added from the explain error in github ,but still give me error the value of recall is 0.0 and f1 is also 0.0, I think the problem is in the data or the way I split the data, but I am not sure how to fix it ..
+# Update after searching : I added max_depth and min_samples_leaf to the random forest to prevent overfitting and help the model learn better from the minority class, which should improve recall and f1 scores.
 def train_balanced_forest(X_train, y_train, X_test, y_test):
     """Train a Random Forest with balanced class weights to improve minority class recall."""
-    # Train with class_weight='balanced' to handle class imbalance
+    
     rf_balanced = RandomForestClassifier(
-        n_estimators=100,
-        class_weight='balanced',  # Critical: addresses class imbalance
-        random_state=42
+        n_estimators=200,                    # Increased from 100 to give more trees to learn from the minority class
+        class_weight='balanced',           
+        max_depth=10,                        #  prevents overfitting + helps minority class
+        min_samples_leaf=2,                  # Helps avoid predicting only majority class
+        random_state=42,
+        n_jobs=-1                           
     )
+    
     rf_balanced.fit(X_train, y_train)
     
-    # Make predictions
     y_pred = rf_balanced.predict(X_test)
     
-    # Calculate metrics
     metrics = {
         "precision": precision_score(y_test, y_pred, zero_division=0),
-        "recall": recall_score(y_test, y_pred, zero_division=0),
-        "f1": f1_score(y_test, y_pred, zero_division=0)
+        "recall":    recall_score(y_test, y_pred, zero_division=0),
+        "f1":        f1_score(y_test, y_pred, zero_division=0)
     }
     
     return metrics
