@@ -45,29 +45,28 @@ def get_feature_importances(model, feature_names):
     feature_importance_dict = dict(zip(feature_names, importances))
     return dict(sorted(feature_importance_dict.items(), key=lambda x: x[1], reverse=True)) 
 
-
-def train_balanced_forest(X_train, y_train, X_test, y_test,
-                          n_estimators=100, random_state=42): 
-    """Train a RandomForest with balanced class weights and return metrics.
-
-    Args:
-        X_train, y_train: Training data.
-        X_test, y_test: Test data.
-        n_estimators: Number of trees.
-        random_state: Random seed.
-
-    Returns:
-        Dictionary with keys: 'precision', 'recall', 'f1'.
-    """
-    #  Train RandomForestClassifier with class_weight='balanced',predict on test set, compute and return metrics
-    rf = RandomForestClassifier(n_estimators=n_estimators, class_weight='balanced', random_state=random_state)
-    rf.fit(X_train, y_train)
-    y_pred = rf.predict(X_test) 
-    return {
-        'precision': precision_score(y_test, y_pred),
-        'recall': recall_score(y_test, y_pred),
-        'f1': f1_score(y_test, y_pred)
-    } 
+# this function I  added from the explain error in github ,but still give me error the value of recall is 0.0 and f1 is also 0.0, I think the problem is in the data or the way I split the data, but I am not sure how to fix it ..
+def train_balanced_forest(X_train, y_train, X_test, y_test):
+    """Train a Random Forest with balanced class weights to improve minority class recall."""
+    # Train with class_weight='balanced' to handle class imbalance
+    rf_balanced = RandomForestClassifier(
+        n_estimators=100,
+        class_weight='balanced',  # Critical: addresses class imbalance
+        random_state=42
+    )
+    rf_balanced.fit(X_train, y_train)
+    
+    # Make predictions
+    y_pred = rf_balanced.predict(X_test)
+    
+    # Calculate metrics
+    metrics = {
+        "precision": precision_score(y_test, y_pred, zero_division=0),
+        "recall": recall_score(y_test, y_pred, zero_division=0),
+        "f1": f1_score(y_test, y_pred, zero_division=0)
+    }
+    
+    return metrics
 
 
 if __name__ == "__main__":
